@@ -38,22 +38,23 @@ func handlerFunc(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func prepareConnection() {
+func prepareConnection() dbox.IConnection {
 	ci := &dbox.ConnectionInfo{"localhost:27017", "local", "", "", nil}
-	var err error
-	conn, err = dbox.NewConnection("mongo", ci)
+	con, err := dbox.NewConnection("mongo", ci)
 	if err != nil {
-		return
+		return con
 	}
-	err = conn.Connect()
+	err = con.Connect()
 	if err != nil {
-		return
+		return con
 	}
-	return
+	return con
 }
 
 func main() {
-	prepareConnection()
+	conn = prepareConnection()
+	defer conn.Close()
+
 	http.HandleFunc("/", handlerFunc)
 	port := "8003"
 	fmt.Println("this server run at port", port)
