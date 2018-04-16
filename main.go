@@ -2,58 +2,63 @@ package main
 
 import (
 	"fmt"
-	"github.com/eaciit/dbox"
-	_ "github.com/eaciit/dbox/dbc/mongo"
+	"gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
 	"net/http"
 )
 
-var conn dbox.IConnection
+var conn *mgo.Session
+var col *mgo.Collection
 
 type Counter struct {
+	ID    string `json:"id" bson:"_id"`
 	Count int
 }
 
 func handlerFunc(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/" {
-		csr, err := conn.NewQuery().From("counter").Cursor(nil)
-		if err != nil {
-			fmt.Println("error create cursor", err.Error())
-			return
-		}
 		counter := Counter{}
-		err = csr.Fetch(&counter, 1, false)
+		err := col.Find(nil).One(&counter)
 		if err != nil {
 			fmt.Println("error fetch data", err.Error())
 			return
 		}
+
 		counter.Count++
 		fmt.Fprint(w, fmt.Sprintf("<h1>Hello Container World! I have been seen %d times</h1>", counter.Count))
-		err = conn.NewQuery().From("counter").Save().Exec(map[string]interface{}{
-			"data": Counter{counter.Count},
-		})
+		fmt.Println(counter.ID, counter.Count)
+		colQuerier := bson.M{"_id": counter.ID}
+		change := bson.M{"$set": bson.M{"count": counter.Count}}
+		err = col.Update(colQuerier, change)
 		if err != nil {
-			fmt.Println("error save data", err.Error())
+			fmt.Println("error update data", err.Error())
 			return
 		}
 	}
 }
 
-func prepareConnection() dbox.IConnection {
-	ci := &dbox.ConnectionInfo{"localhost:27017", "local", "", "", nil}
-	con, err := dbox.NewConnection("mongo", ci)
-	if err != nil {
-		return con
+func prepareConnection() *mgo.Session {
+	ci := &mgo.DialInfo{
+		Addrs:    []string{"localhost:27017"},
+		Database: "local",
+		Username: "",
+		Password: "",
 	}
-	err = con.Connect()
+
+	ses, err := mgo.DialWithInfo(ci)
 	if err != nil {
-		return con
+		fmt.Println("failed to create mongo session")
+		return ses
 	}
-	return con
+	return ses
 }
 
 func main() {
 	conn = prepareConnection()
 	defer conn.Close()
+
+	conn.SetMode(mgo.Monotonic, true)
+	col = conn.DB("local").C("counter")
 
 	http.HandleFunc("/", handlerFunc)
 	port := "8003"
