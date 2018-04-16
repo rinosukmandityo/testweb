@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -26,7 +27,7 @@ func handlerFunc(w http.ResponseWriter, r *http.Request) {
 
 		counter.Count++
 		fmt.Fprint(w, fmt.Sprintf("<h1>Hello Container World! I have been seen %d times</h1>", counter.Count))
-		fmt.Println(counter.ID, counter.Count)
+
 		colQuerier := bson.M{"_id": counter.ID}
 		change := bson.M{"$set": bson.M{"count": counter.Count}}
 		err = col.Update(colQuerier, change)
@@ -37,12 +38,13 @@ func handlerFunc(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func prepareConnection() *mgo.Session {
+func prepareConnection(url, username, pwd, db string) *mgo.Session {
+	fmt.Println("creating new session")
 	ci := &mgo.DialInfo{
-		Addrs:    []string{"localhost:27017"},
-		Database: "local",
-		Username: "",
-		Password: "",
+		Addrs:    []string{url},
+		Database: db,
+		Username: username,
+		Password: pwd,
 	}
 
 	ses, err := mgo.DialWithInfo(ci)
@@ -50,18 +52,36 @@ func prepareConnection() *mgo.Session {
 		fmt.Println("failed to create mongo session")
 		return ses
 	}
+	fmt.Println("session created")
 	return ses
 }
 
 func main() {
-	conn = prepareConnection()
+	host := "localhost"
+	portDB := "27017"
+	username := ""
+	pwd := ""
+	database := "local"
+	collname := "local"
+
+	flag.StringVar(&host, "host", "localhost", "to determine database host")
+	flag.StringVar(&portDB, "port", "27017", "to determine database port")
+	flag.StringVar(&username, "user", "", "to determine database username")
+	flag.StringVar(&pwd, "pwd", "", "to determine database password")
+	flag.StringVar(&database, "db", "local", "to determine database name")
+	flag.StringVar(&collname, "col", "local", "to determine collection name")
+	flag.Parse()
+
+	url := host + ":" + portDB
+	conn = prepareConnection(url, username, pwd, database)
 	defer conn.Close()
 
 	conn.SetMode(mgo.Monotonic, true)
-	col = conn.DB("local").C("counter")
+	col = conn.DB(database).C(collname)
 
 	http.HandleFunc("/", handlerFunc)
 	port := "8003"
-	fmt.Println("this server run at port", port)
+	fmt.Println("APPS run on port", port)
+	fmt.Println("DATABASE run at host", url)
 	http.ListenAndServe(":"+port, nil)
 }
