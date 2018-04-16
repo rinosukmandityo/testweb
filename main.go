@@ -62,14 +62,14 @@ func main() {
 	username := ""
 	pwd := ""
 	database := "local"
-	collname := "local"
+	collname := "counter"
 
 	flag.StringVar(&host, "host", "localhost", "to determine database host")
 	flag.StringVar(&portDB, "port", "27017", "to determine database port")
 	flag.StringVar(&username, "user", "", "to determine database username")
 	flag.StringVar(&pwd, "pwd", "", "to determine database password")
 	flag.StringVar(&database, "db", "local", "to determine database name")
-	flag.StringVar(&collname, "col", "local", "to determine collection name")
+	flag.StringVar(&collname, "col", "counter", "to determine collection name")
 	flag.Parse()
 
 	url := host + ":" + portDB
