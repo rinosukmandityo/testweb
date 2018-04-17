@@ -6,6 +6,7 @@ import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"net/http"
+	"os"
 )
 
 var conn *mgo.Session
@@ -71,6 +72,25 @@ func main() {
 	flag.StringVar(&database, "db", "local", "to determine database name")
 	flag.StringVar(&collname, "col", "counter", "to determine collection name")
 	flag.Parse()
+
+	if os.Getenv("host") != "" {
+		host = os.Getenv("host")
+	}
+	if os.Getenv("port") != "" {
+		portDB = os.Getenv("port")
+	}
+	if os.Getenv("user") != "" {
+		username = os.Getenv("user")
+	}
+	if os.Getenv("pwd") != "" {
+		pwd = os.Getenv("pwd")
+	}
+	if os.Getenv("db") != "" {
+		database = os.Getenv("db")
+	}
+	if os.Getenv("col") != "" {
+		collname = os.Getenv("col")
+	}
 
 	url := host + ":" + portDB
 	fmt.Println("url", url)
