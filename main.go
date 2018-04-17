@@ -73,6 +73,7 @@ func main() {
 	flag.Parse()
 
 	url := host + ":" + portDB
+	fmt.Println("url", url)
 	conn = prepareConnection(url, username, pwd, database)
 	defer conn.Close()
 
