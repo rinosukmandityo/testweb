@@ -58,14 +58,14 @@ func prepareConnection(url, username, pwd, db string) *mgo.Session {
 }
 
 func main() {
-	host := "192.168.99.100"
+	host := "localhost"
 	portDB := "27017"
 	username := ""
 	pwd := ""
 	database := "local"
 	collname := "counter"
 
-	flag.StringVar(&host, "host", "192.168.99.100", "to determine database host")
+	flag.StringVar(&host, "host", "localhost", "to determine database host")
 	flag.StringVar(&portDB, "port", "27017", "to determine database port")
 	flag.StringVar(&username, "user", "", "to determine database username")
 	flag.StringVar(&pwd, "pwd", "", "to determine database password")
