@@ -28,14 +28,17 @@ func handlerFunc(w http.ResponseWriter, r *http.Request) {
 
 		counter.Count++
 		fmt.Fprint(w, fmt.Sprintf("<h1>Hello Container World! I have been seen %d times</h1>", counter.Count))
+		saveData(counter)
+	}
+}
 
-		colQuerier := bson.M{"_id": counter.ID}
-		change := bson.M{"$set": bson.M{"count": counter.Count}}
-		err = col.Update(colQuerier, change)
-		if err != nil {
-			fmt.Println("error update data", err.Error())
-			return
-		}
+func saveData(counter Counter) {
+	colQuerier := bson.M{"_id": counter.ID}
+	change := bson.M{"$set": bson.M{"count": counter.Count}}
+	err := col.Update(colQuerier, change)
+	if err != nil {
+		fmt.Println("error save data", err.Error())
+		return
 	}
 }
 
@@ -47,8 +50,23 @@ func prepareConnection(url, username, pwd, db string) *mgo.Session {
 		Username: username,
 		Password: pwd,
 	}
-
 	ses, err := mgo.DialWithInfo(ci)
+	if err != nil {
+		fmt.Println("failed to create mongo session")
+		return ses
+	}
+	fmt.Println("session created")
+	return ses
+}
+
+func prepareConnectionWithUri(uri string) (ses *mgo.Session) {
+	fmt.Println("creating new session with uri")
+	ci, err := mgo.ParseURL(uri)
+	if err != nil {
+		fmt.Println("failed to parse uri into dial info")
+		return ses
+	}
+	ses, err = mgo.DialWithInfo(ci)
 	if err != nil {
 		fmt.Println("failed to create mongo session")
 		return ses
@@ -93,12 +111,36 @@ func main() {
 	}
 
 	url := host + ":" + portDB
-	fmt.Println("url", url)
-	conn = prepareConnection(url, username, pwd, database)
+	if os.Getenv("uri") != "" {
+		url = os.Getenv("uri")
+		conn = prepareConnectionWithUri(url)
+	} else {
+		conn = prepareConnection(url, username, pwd, database)
+	}
 	defer conn.Close()
+	fmt.Println("url", url)
 
 	conn.SetMode(mgo.Monotonic, true)
+	db := conn.DB(database)
+	colList, err := db.CollectionNames()
+	if err != nil {
+		fmt.Println("error get collection list", err.Error())
+	}
+	isColExist := false
+	for _, val := range colList {
+		if val == collname {
+			isColExist = true
+			break
+		}
+	}
 	col = conn.DB(database).C(collname)
+	if !isColExist {
+		counter := Counter{
+			"mycounter",
+			0,
+		}
+		saveData(counter)
+	}
 
 	http.HandleFunc("/", handlerFunc)
 	port := "8003"
