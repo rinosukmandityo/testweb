@@ -112,10 +112,8 @@ func main() {
 	}
 
 	url := host + ":" + portDB
-	test := "mongodb://mongo-0.mongo:27017,mongo-1.mongo:27017,mongo-2.mongo:27017/local?replicaSet=rs0"
-	if os.Getenv("uri") != "" || test != "" {
-		// url = os.Getenv("uri")
-		url = test
+	if os.Getenv("uri") != "" {
+		url = os.Getenv("uri")
 		conn = prepareConnectionWithUri(url)
 	} else {
 		conn = prepareConnection(url, username, pwd, database)
