@@ -43,7 +43,7 @@ func saveData(counter Counter) {
 }
 
 func prepareConnection(url, username, pwd, db string) *mgo.Session {
-	fmt.Println("creating new session")
+	fmt.Println("creating new session with url", url)
 	ci := &mgo.DialInfo{
 		Addrs:    []string{url},
 		Database: db,
@@ -60,12 +60,13 @@ func prepareConnection(url, username, pwd, db string) *mgo.Session {
 }
 
 func prepareConnectionWithUri(uri string) (ses *mgo.Session) {
-	fmt.Println("creating new session with uri")
+	fmt.Println("creating new session with uri", uri)
 	ci, err := mgo.ParseURL(uri)
 	if err != nil {
 		fmt.Println("failed to parse uri into dial info")
 		return ses
 	}
+	fmt.Printf("%+v\n", ci)
 	ses, err = mgo.DialWithInfo(ci)
 	if err != nil {
 		fmt.Println("failed to create mongo session")
@@ -111,14 +112,15 @@ func main() {
 	}
 
 	url := host + ":" + portDB
-	if os.Getenv("uri") != "" {
-		url = os.Getenv("uri")
+	test := "mongodb://mongo-0.mongo:27017,mongo-1.mongo:27017,mongo-2.mongo:27017/local?replicaSet=rs0"
+	if os.Getenv("uri") != "" || test != "" {
+		// url = os.Getenv("uri")
+		url = test
 		conn = prepareConnectionWithUri(url)
 	} else {
 		conn = prepareConnection(url, username, pwd, database)
 	}
 	defer conn.Close()
-	fmt.Println("url", url)
 
 	conn.SetMode(mgo.Monotonic, true)
 	db := conn.DB(database)
