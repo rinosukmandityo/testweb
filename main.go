@@ -46,13 +46,14 @@ func saveData(counter Counter, operation string) {
 }
 
 func prepareConnection(url, username, pwd, db string) *mgo.Session {
-	fmt.Println("creating new session with url", url)
+	fmt.Println("creating new session with URL:", url)
 	ci := &mgo.DialInfo{
 		Addrs:    []string{url},
 		Database: db,
 		Username: username,
 		Password: pwd,
 	}
+
 	ses, err := mgo.DialWithInfo(ci)
 	if err != nil {
 		fmt.Println("failed to create mongo session")
@@ -63,13 +64,16 @@ func prepareConnection(url, username, pwd, db string) *mgo.Session {
 }
 
 func prepareConnectionWithUri(uri string) (ses *mgo.Session) {
-	fmt.Println("creating new session with uri", uri)
+	fmt.Println("creating new session with URI:\n", uri)
 	ci, err := mgo.ParseURL(uri)
 	if err != nil {
 		fmt.Println("failed to parse uri into dial info")
 		return ses
 	}
-	fmt.Printf("%+v\n", ci)
+	fmt.Println("list of host:")
+	for idx, val := range ci.Addrs {
+		fmt.Println(fmt.Printf("%d. %s", idx+1, val))
+	}
 	ses, err = mgo.DialWithInfo(ci)
 	if err != nil {
 		fmt.Println("failed to create mongo session")
