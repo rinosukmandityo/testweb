@@ -28,14 +28,17 @@ func handlerFunc(w http.ResponseWriter, r *http.Request) {
 
 		counter.Count++
 		fmt.Fprint(w, fmt.Sprintf("<h1>Hello Container World! I have been seen %d times</h1>", counter.Count))
-		saveData(counter)
+		saveData(counter, "update")
 	}
 }
 
-func saveData(counter Counter) {
-	colQuerier := bson.M{"_id": counter.ID}
-	change := bson.M{"$set": bson.M{"count": counter.Count}}
-	err := col.Update(colQuerier, change)
+func saveData(counter Counter, operation string) {
+	var err error
+	if operation == "insert" {
+		err = col.Insert(counter)
+	} else {
+		err = col.Update(bson.M{"_id": counter.ID}, bson.M{"$set": bson.M{"count": counter.Count}})
+	}
 	if err != nil {
 		fmt.Println("error save data", err.Error())
 		return
@@ -139,7 +142,7 @@ func main() {
 			"mycounter",
 			0,
 		}
-		saveData(counter)
+		saveData(counter, "insert")
 	}
 
 	http.HandleFunc("/", handlerFunc)
