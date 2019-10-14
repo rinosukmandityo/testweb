@@ -6,9 +6,8 @@ We do not support Windows at this point in time. If you don't have access to an 
 
 This needs following mandatory apps:
 - [Golang to be installed](https://golang.org/doc/install), and
-- [Git to be installed](https://www.atlassian.com/git/tutorials/install-git), followed by some libraries. 
-
-The steps are listed below.
+- [Git to be installed](https://www.atlassian.com/git/tutorials/install-git), 
+- And followed by some libraries. The steps are listed below.
 
 ## Setup
 
