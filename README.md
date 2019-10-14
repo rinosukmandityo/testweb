@@ -1,6 +1,6 @@
 # Functional Suite
 
-`functional_spec/` contains some logic for each parking lot command and automated testing suite that will validate the correctness of parking lot command for the sample input and output.
+`functional_spec/` contains some logics for each parking lot command and automated testing suite that will validate the correctness of parking lot command for the sample input and output.
 
 We do not support Windows at this point in time. If you don't have access to an OSX or Linux machine, we recommend setting up a Linux machine you can develop against using something like [VirtualBox](https://www.virtualbox.org/) or [Docker](https://docs.docker.com/docker-for-windows/#test-your-installation).
 
@@ -10,7 +10,7 @@ This needs following mandatory apps:
 
 ## Setup
 
-First, put `parking_lot.zip` into your linux environment, after that install [Golang](https://golang.org/doc/install). Then run the following commands in your current directory.
+First, put `parking_lot.zip` into your linux environment, after [Golang](https://golang.org/doc/install) installation and [Git](https://www.atlassian.com/git/tutorials/install-git) installation finished. Then run the following commands in your current directory.
 
 ```
 $ go version # confirm Golang present
